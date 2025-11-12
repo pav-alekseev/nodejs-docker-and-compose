@@ -12,7 +12,7 @@ import { LocalStrategy } from './local.strategy';
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.SECRET_KEY,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '30d' },
     }),
   ],
