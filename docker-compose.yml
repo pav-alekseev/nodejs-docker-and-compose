@@ -1,55 +1,44 @@
+version: "3"
+
 services:
   backend:
-    container_name: post-backend
+    container_name: "kupipodariday-backend"
     build:
-      context: ./backend
-      target: ${MODE:-prod}
-    env_file:
-      - .env
+      context: backend
+      dockerfile: Dockerfile
+    image: backend-compose-kupipodariday
+    restart: always
     ports:
-      - 4000:3001
-    depends_on:
-      db:
-        condition: service_healthy
+      - "4000:3000"
+    env_file: .env
     networks:
-      - net-backend
+      - internal
+
+  postgres:
+    container_name: "postgres"
+    image: postgres:12.12-alpine
+    env_file: .env
+    restart: always
+    networks:
+      - internal
+    volumes:
+      - pg_data:/data/postgres_db
 
   frontend:
-    container_name: post-frontend
-    build: ./frontend
-    ports:
-      - 8081:80
-    networks:
-      - net-frontend
-
-  db:
-    container_name: postgres
+    container_name: "kupipodariday-frontend"
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: frontend-compose-kupipodariday
     restart: always
-    image: postgres
-    env_file:
-      - .env
     ports:
-      - 5432:5432
-    volumes:
-      - db-data:${POSTGRES_PGDATA}
-    healthcheck:
-      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "8081:80"
     networks:
-      - net-backend
-
-  adminer:
-    image: adminer
-    ports:
-      - 8080:8080
-    networks:
-      - net-backend
+      - external
 
 volumes:
-  db-data: {}
+  pg_data:
 
 networks:
-  net-backend: {}
-  net-frontend: {}
+  internal:
+  external:
